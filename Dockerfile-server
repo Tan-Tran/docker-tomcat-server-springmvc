@@ -1,0 +1,31 @@
+FROM ubuntu:16.04
+
+LABEL MAINTAINER="tan tran"
+
+#Verify the version exists here or else change it: http://apache.rediris.es/tomcat
+ENV TOMCAT_VERSION 9.0.65
+
+# Run an update to get all the security patches
+RUN apt-get -y update && apt-get -y upgrade
+
+#Install curl/vim incase you want to debug. VIM - vi editor, curl is a utility which acts as http client which can be run from the unix prompt.
+RUN apt-get -y install software-properties-common
+
+#Install CURL and VIM editors
+RUN apt-get -y install curl wget vim
+
+RUN add-apt-repository ppa:openjdk-r/ppa
+RUN apt-get update -y
+RUN apt-get install -y openjdk-11-jdk
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
+
+# Get Tomcat
+# notice that i can add the same RUN command across multiple lines. This is done for Performance optimization
+# and does not create too many layers in the image. Use this format if you would like for better maintenance.
+RUN wget --quiet --no-cookies http://apache.rediris.es/tomcat/tomcat-9/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -O /tmp/tomcat.tgz && \
+tar xzvf /tmp/tomcat.tgz -C /opt && \
+mv /opt/apache-tomcat-${TOMCAT_VERSION} /opt/tomcat && \
+rm /tmp/tomcat.tgz && \
+rm -rf /opt/tomcat/webapps/examples && \
+rm -rf /opt/tomcat/webapps/docs && \
+rm -rf /opt/tomcat/webapps/ROOT
